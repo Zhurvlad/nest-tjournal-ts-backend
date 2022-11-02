@@ -3,12 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {ConfigModule} from "@nestjs/config";
+import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule,
+  imports: [
+    UserModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       url: process.env.DATABASE_URL,
@@ -22,6 +24,7 @@ import { CommentModule } from './comment/comment.module';
     }),
     PostModule,
     CommentModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
