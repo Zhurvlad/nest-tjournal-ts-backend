@@ -1,18 +1,19 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import {IsEmail} from 'class-validator'
+import { IsEmail } from 'class-validator';
+
+//Создаёт в БД колонки с параметрами
 
 @Entity('users')
 export class UserEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    fullName: string;
+  @Column()
+  fullName: string;
 
-    @Column()
-    @IsEmail()
-    email: string;
+  @Column()
+  email: string;
 
-    @Column()
-    password: string;
+  @Column({ nullable: false })
+  password?: string;
 }
