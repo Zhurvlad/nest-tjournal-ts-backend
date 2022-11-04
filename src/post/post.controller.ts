@@ -14,7 +14,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { SearchPostDto } from './dto/serch-post.dto';
 
-//Контроллер просто возвращает результат выполненнойработы
+//Контроллер просто возвращает результат выполненной работы
 
 @Controller('posts')
 export class PostController {

@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { LoginUserDto } from './dto/login-user.dto';
+import { SearchPostDto } from '../post/dto/serch-post.dto';
+import { SearchUserDto } from './dto/serch-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -22,18 +24,45 @@ export class UsersService {
   }
 
   findById(id: number) {
-    return this.repository.findOneBy({ id });
+    return this.repository.findOne(id);
   }
 
   findByCond(cond: LoginUserDto) {
-    return this.repository.findOneBy(cond);
+    return this.repository.findOne(cond);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: number, dto: UpdateUserDto) {
+    return this.repository.update(id, dto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async search(dto: SearchUserDto) {
+    const qb = this.repository.createQueryBuilder('user');
+
+    qb.limit(dto.limit || 0);
+    qb.take(dto.take || 10);
+
+    //Ищем в тайтле любое совпадение
+    if (dto.fullName) {
+      qb.andWhere(`user.fullName ILIKE :fullName`);
+    }
+
+    if (dto.email) {
+      qb.andWhere(`user.email ILIKE :email `);
+    }
+
+    //Выносим параетры в переменные
+    qb.setParameters({
+      title: `%${dto.fullName}%`,
+      tag: `%${dto.email}%`,
+    });
+
+    console.log(qb.getSql());
+
+    const [items, totalCount] = await qb.getManyAndCount();
+
+    return {
+      items,
+      totalCount,
+    };
   }
 }
