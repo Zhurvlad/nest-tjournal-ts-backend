@@ -46,7 +46,12 @@ export class AuthService {
   //Регестрируем пользователя
   async register(dto: CreateUserDto) {
     try {
-      const { password, ...user } = await this.usersService.create(dto);
+      //Точно указываем что мы ожидаем от фронтэнда
+      const { password, ...user } = await this.usersService.create({
+        email: dto.email,
+        fullName: dto.fullName,
+        password: dto.password,
+      });
 
       return {
         ...user,
