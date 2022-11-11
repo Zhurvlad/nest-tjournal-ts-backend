@@ -3,9 +3,11 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, ManyToOne,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
+import { OutputBlockData } from '../dto/create-post.dto';
+import { UserEntity } from '../../user/entities/user.entity';
 
 //Создаёт в БД колонки с параметрами
 
@@ -17,8 +19,15 @@ export class PostEntity {
   @Column()
   title: string;
 
+  @Column({type: 'jsonb', nullable: true}, )
+  body: OutputBlockData[];
+
   @Column()
-  body: string;
+  description: string
+
+    //Связываем посты с юзером. Eager делает эту связь
+  @ManyToOne(() => UserEntity, {eager: true})
+  user: UserEntity
 
   @Column({
     default: 0,

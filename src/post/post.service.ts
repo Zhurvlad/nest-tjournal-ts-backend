@@ -1,12 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PostEntity } from './entities/post.entity';
 import { SearchPostDto } from './dto/serch-post.dto';
+import { UserEntity } from '../user/entities/user.entity';
 
 //В сервисе мы выполняем всю логику и проверки
+//Мы должны прописывать строго те данные которые мы ожидаем
 
 @Injectable()
 export class PostService {
@@ -15,8 +17,17 @@ export class PostService {
     private repository: Repository<PostEntity>,
   ) {}
 
-  create(dto: CreatePostDto) {
-    return this.repository.save(dto);
+  create(dto: CreatePostDto, userId: number) {
+    //т.к. мы используем эдитор JS  мы находим тип раный паараграфу и достаём из него текст
+    const firstParagraph = dto.body.find(obj => obj.type === 'paragraph')?.data?.text
+    return this.repository.save({
+      title: dto.title,
+      body: dto.body,
+      tags: dto.tags,
+      description: firstParagraph || '',
+      //Делаем релейшен и связываем пользователя с его оставленным комментарием
+      user: {id: userId}
+    });
   }
 
   findAll() {
@@ -114,6 +125,7 @@ export class PostService {
       })
       .execute();
 
+    //Можно указать связь между Post и user с помощь {relations: ["user"]}
     return this.repository.findOne(id);
 
     // const find = await this.repository.findOneBy({ id });
@@ -125,20 +137,33 @@ export class PostService {
     // return find;
   }
 
-  async update(id: number, dto: UpdatePostDto) {
+  async update(id: number, dto: UpdatePostDto, userId: number) {
     const find = await this.repository.findOne(id);
 
     if (!find) {
       throw new NotFoundException('Статья не найдена');
     }
-    return this.repository.update(id, dto);
+    const firstParagraph = dto.body.find(obj => obj.type === 'paragraph')?.data.text
+
+    return this.repository.update(id, {
+      title: dto.title,
+      body: dto.body,
+      tags: dto.tags,
+      description: firstParagraph || '',
+      //Делаем релейшен и связываем пользователя с его оставленным комментарием
+      user: {id: userId}
+    });
   }
 
-  async remove(id: number) {
+  async remove(id: number, userId: number) {
     const find = await this.repository.findOne(id);
 
     if (!find) {
       throw new NotFoundException('Статья не найдена');
+    }
+
+    if(find.user.id !== userId){
+      throw new ForbiddenException('Вы не можете удалить статью которая не пренадлежит вам');
     }
 
     return this.repository.delete(id);
