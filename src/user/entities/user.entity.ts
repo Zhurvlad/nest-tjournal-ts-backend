@@ -3,9 +3,10 @@ import {
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn, OneToMany,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
+import { CommentEntity } from '../../comment/entities/comment.entity';
 
 //Создаёт в БД колонки с параметрами
 
@@ -19,6 +20,12 @@ export class UserEntity {
 
   @Column({ unique: true })
   email: string;
+
+  @OneToMany(() => CommentEntity, (comment) => comment.user, {
+    eager: false,
+    nullable: true
+  })
+  comment: CommentEntity[]
 
   @Column({ nullable: false })
   password?: string;

@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn,
+  JoinColumn, OneToMany,
 } from 'typeorm';
 import { IsEmail } from 'class-validator';
 import { UserEntity } from '../../user/entities/user.entity';
@@ -21,6 +21,8 @@ export class CommentEntity {
   @Column()
   text: string;
 
+
+
   //Говорим что одному юзеру может принадлежать много комментариев
   // и добавляем колонку для того чтобы в ней сохранить
   // Айди юзера который написал коммент
@@ -29,7 +31,7 @@ export class CommentEntity {
   user: UserEntity;
 
   @ManyToOne(() => PostEntity, { nullable: false })
-  @JoinColumn({ name: 'PostId' })
+  @JoinColumn({ name: 'postId' })
   post: PostEntity;
 
   @CreateDateColumn({ type: 'timestamp' })

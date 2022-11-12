@@ -7,20 +7,36 @@ import { UserEntity } from './entities/user.entity';
 import { LoginUserDto } from './dto/login-user.dto';
 import { SearchPostDto } from '../post/dto/serch-post.dto';
 import { SearchUserDto } from './dto/serch-user.dto';
+import { CommentEntity } from '../comment/entities/comment.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private repository: Repository<UserEntity>,
-  ) {}
+  ) {
+  }
 
   create(dto: CreateUserDto) {
     return this.repository.save(dto);
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    //Смотрим сколько комментариев написал пользователь
+    const arr = await this.repository
+      .createQueryBuilder('user')
+      .leftJoinAndMapMany('user.comment',
+        CommentEntity,
+        'comment',
+        'comment.UserId = user.id')
+      //Добавляем строку количество комментариев к этому юзеру
+      .loadRelationCountAndMap('u.commentsCount', 'user.comment', 'comment')
+      .getMany();
+
+    return arr.map((obj) => {
+      delete obj.comment;
+      return obj;
+      })
   }
 
   findById(id: number) {
